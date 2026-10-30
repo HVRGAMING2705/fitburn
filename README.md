@@ -17,4 +17,4 @@ Predicts the calories burned by a workout from age, weight, duration, average he
 - `index.html` — interactive demo; the browser runs the exact same weights as Python
 
 ## Live demo
-https://fitburn.vercel.app
+https://fitburn-tawny.vercel.app
