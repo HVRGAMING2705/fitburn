@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FitBurn — Calorie Burn Predictor | AI/ML Project</title>
+<meta name="description" content="FitBurn predicts how many calories a workout burns from age, weight, duration, heart rate and intensity, using a ridge regression model trained on 600 synthetic workouts.">
+<link rel="canonical" href="https://fitburn.vercel.app/">
+<meta property="og:title" content="FitBurn — Calorie Burn Predictor">
+<meta property="og:description" content="Enter your workout details and instantly estimate calories burned, with a real trained ML model running in your browser.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://fitburn.vercel.app/">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="FitBurn — Calorie Burn Predictor">
+<meta name="twitter:description" content="Ridge regression calorie-burn predictor. Try the live demo in your browser.">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"WebApplication","name":"FitBurn","applicationCategory":"HealthApplication","description":"Calorie burn predictor using ridge regression.","url":"https://fitburn.vercel.app/"}</script>
+<style>
+body{font-family:Arial,Helvetica,sans-serif;color:#000;background:#fff;max-width:720px;margin:0 auto;padding:24px;line-height:1.5}
+h1{font-size:2em} label{display:block;margin:12px 0 4px;font-weight:bold}
+input,select{width:100%;padding:10px;font-size:16px;border:1px solid #000;border-radius:4px;box-sizing:border-box}
+button{margin-top:20px;padding:12px 24px;font-size:17px;background:#000;color:#fff;border:none;border-radius:4px;cursor:pointer}
+#result{margin-top:24px;padding:20px;border:2px solid #000;border-radius:8px;display:none}
+#result b{font-size:2em}
+.note{color:#333;font-size:.95em} code{background:#f2f2f2;padding:2px 5px}
+</style>
+</head>
+<body>
+<h1>&#128293; FitBurn — Calorie Burn Predictor</h1>
+<p class="note">A 2nd-year B.Tech AI/ML project by Vikranth Reddy. A ridge regression model trained on 600 synthetic workouts predicts the calories a workout burns. 5-fold CV: <b>R&sup2; = 0.907</b>, MAE = 89.8 kcal vs a 310.6 kcal mean-guess baseline.</p>
+<label>Age (years)</label><input id="age" type="number" value="22" min="10" max="90">
+<label>Weight (kg)</label><input id="weight" type="number" value="68" min="30" max="200">
+<label>Workout duration (minutes)</label><input id="duration" type="number" value="45" min="5" max="300">
+<label>Average heart rate (bpm)</label><input id="hr" type="number" value="140" min="60" max="200">
+<label>Workout intensity (MET level)</label>
+<select id="intensity">
+<option value="3.5">Light — walking, yoga (3.5 MET)</option>
+<option value="5">Moderate — brisk walk, cycling (5 MET)</option>
+<option value="7" selected>Vigorous — running, HIIT (7 MET)</option>
+<option value="9">Very hard — sprinting, intense training (9 MET)</option>
+</select>
+<button onclick="predict()">Estimate calories burned</button>
+<div id="result"></div>
+<p class="note">How it works: each input is standardised with the training means and standard deviations, then multiplied by the model's learned coefficients. The exact same weights run in this page and in the Python training script (<code>train.py</code>), so the browser result matches the trained model to within 0.01 kcal.</p>
+<p class="note">Model: Ridge regression (&alpha; = 1.0) on standardised features — age, weight, duration, average heart rate, intensity (MET). Try a sample: 30 yrs, 75 kg, 90 min, 155 bpm, 8.5 MET &rarr; about 964 kcal.</p>
+<p><a href="https://github.com/HVRGAMING2705/fitburn">View source on GitHub</a></p>
+<script>
+const MEANS = [40.303341033245104, 77.77378795632318, 65.77936771028261, 131.1674620925869, 6.541798545564218];
+const STDS = [14.062376355996303, 19.164696740414342, 31.89514529940848, 24.821049746657906, 2.0018199739736424];
+const COEF = [-0.6495602390788331, 135.8248841762191, 285.77767431235526, 4.101053761178485, 168.17323188032424];
+const INTERCEPT = 598.164923572177;
+function predict(){
+  const v = [parseFloat(document.getElementById("age").value), parseFloat(document.getElementById("weight").value), parseFloat(document.getElementById("duration").value), parseFloat(document.getElementById("hr").value), parseFloat(document.getElementById("intensity").value)];
+  let cal = INTERCEPT;
+  for (let j = 0; j < 5; j++) cal += ((v[j]-MEANS[j])/STDS[j]) * COEF[j];
+  cal = Math.max(30, Math.min(1500, cal));
+  const el = document.getElementById("result");
+  el.style.display = "block";
+  el.innerHTML = "<b>" + Math.round(cal) + " kcal</b><br>Estimated calories burned for this workout.<br><span class='note'>That is roughly " + (cal/250).toFixed(1) + " samosas, or " + (cal/100).toFixed(1) + " km of running worth of energy.</span>";
+}
+</script>
+</body>
+</html>
